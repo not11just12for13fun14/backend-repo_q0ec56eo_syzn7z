@@ -22,6 +22,7 @@ Subject = Literal[
     "English",
     "Social Studies",
     "Languages",
+    "Computer",
 ]
 
 class AssistRequest(BaseModel):
@@ -37,7 +38,10 @@ class AssistRequest(BaseModel):
         "summary",
         "tips",
         "fun_facts",
-        "related"
+        "related",
+        "visuals",
+        "revision",
+        "quiz"
     ]]] = Field(default=None)
 
 class Section(BaseModel):
@@ -153,6 +157,19 @@ def explain_math(level: int, question: str) -> Dict[str, List[str]]:
     fun = ["Zero is the only number that is neither positive nor negative."]
     related = ["Place value", "Word problems", "Estimation"]
 
+    visuals = [
+        "Picture: Number line showing jumps for addition/subtraction.",
+        "Diagram: Balance scale to show equation solving."
+    ]
+    revision = [
+        "Revise place value and basic operations.",
+        "Memorize common fraction equivalents (1/2=0.5, 1/4=0.25)."
+    ]
+    quiz = [
+        "Quick Quiz: 12 + 19 = ?",
+        "True/False: To divide fractions, flip the second and multiply.",
+    ]
+
     return {
         "steps": steps,
         "examples": examples,
@@ -161,13 +178,16 @@ def explain_math(level: int, question: str) -> Dict[str, List[str]]:
         "summary": summary,
         "fun_facts": fun,
         "related": related,
+        "visuals": visuals,
+        "revision": revision,
+        "quiz": quiz,
     }
 
 
 def explain_science(level: int, question: str) -> Dict[str, List[str]]:
     q = question.lower()
     if "photosynthesis" in q:
-        return {
+        base = {
             "steps": [
                 "Plants take in sunlight with chlorophyll in leaves.",
                 "They use water from roots and carbon dioxide from air.",
@@ -180,22 +200,38 @@ def explain_science(level: int, question: str) -> Dict[str, List[str]]:
             "fun_facts": ["Chloroplasts are the tiny food factories in plant cells."],
             "related": ["Food chains", "Respiration", "Plant cells"],
         }
-    # Generic science fallback
-    return {
-        "steps": ["Observe, ask a question, make a hypothesis, test, and conclude."],
-        "examples": ["Testing which paper towel absorbs more water."],
-        "practice": ["Write a simple hypothesis about melting ice."],
-        "tips": ["Change only one variable at a time."],
-        "summary": ["Science uses fair tests to learn about the world."],
-        "fun_facts": ["Honey never spoils because it has very little water."],
-        "related": ["Variables", "Fair test", "Data tables"],
-    }
+    else:
+        base = {
+            "steps": ["Observe, ask a question, make a hypothesis, test, and conclude."],
+            "examples": ["Testing which paper towel absorbs more water."],
+            "practice": ["Write a simple hypothesis about melting ice."],
+            "tips": ["Change only one variable at a time."],
+            "summary": ["Science uses fair tests to learn about the world."],
+            "fun_facts": ["Honey never spoils because it has very little water."],
+            "related": ["Variables", "Fair test", "Data tables"],
+        }
+
+    base.update({
+        "visuals": [
+            "Diagram: Sun → Leaf → Sugar + Oxygen arrows.",
+            "Chart: Variables vs outcomes in an experiment."
+        ],
+        "revision": [
+            "Recall: solid, liquid, gas changes.",
+            "Know the steps of the scientific method."
+        ],
+        "quiz": [
+            "MCQ: Plants take in (a) oxygen (b) carbon dioxide during photosynthesis.",
+            "Fill in the blank: Energy for photosynthesis comes from _____."
+        ]
+    })
+    return base
 
 
 def explain_english(level: int, question: str) -> Dict[str, List[str]]:
     q = question.lower()
     if any(k in q for k in ["noun", "verb", "adjective", "adverb"]):
-        return {
+        base = {
             "steps": ["Find the word's job in the sentence."],
             "examples": ["Noun: dog; Verb: runs; Adjective: happy; Adverb: quickly."],
             "practice": ["Underline the verbs in: The cat quietly slept."],
@@ -204,21 +240,38 @@ def explain_english(level: int, question: str) -> Dict[str, List[str]]:
             "fun_facts": ["English borrows words from many languages!"],
             "related": ["Sentence types", "Punctuation"],
         }
-    return {
-        "steps": ["Read closely, find main idea, then details."],
-        "examples": ["Main idea: what the text is mostly about."],
-        "practice": ["Write a 2-sentence summary of a short paragraph."],
-        "tips": ["Use transition words: first, then, finally."],
-        "summary": ["Clarity and structure make writing strong."],
-        "fun_facts": ["There are more than a million English words."],
-        "related": ["Synonyms", "Paragraphs", "Summaries"],
-    }
+    else:
+        base = {
+            "steps": ["Read closely, find main idea, then details."],
+            "examples": ["Main idea: what the text is mostly about."],
+            "practice": ["Write a 2-sentence summary of a short paragraph."],
+            "tips": ["Use transition words: first, then, finally."],
+            "summary": ["Clarity and structure make writing strong."],
+            "fun_facts": ["There are more than a million English words."],
+            "related": ["Synonyms", "Paragraphs", "Summaries"],
+        }
+
+    base.update({
+        "visuals": [
+            "Mind map: Topic in center with branches for main idea and details.",
+            "Color-coded sentence showing noun/verb/adjective/adverb."
+        ],
+        "revision": [
+            "Revise punctuation basics: . , ? !",
+            "Know the difference between there/they're/their."
+        ],
+        "quiz": [
+            "Identify the adjective: The small puppy barked loudly.",
+            "Choose a transition to add: First/Then/Finally."
+        ]
+    })
+    return base
 
 
 def explain_social(level: int, question: str) -> Dict[str, List[str]]:
     q = question.lower()
     if any(k in q for k in ["democracy", "government"]):
-        return {
+        base = {
             "steps": ["People choose leaders, leaders make and enforce rules."],
             "examples": ["Voting in local elections."],
             "practice": ["Name two features of a democracy."],
@@ -227,19 +280,36 @@ def explain_social(level: int, question: str) -> Dict[str, List[str]]:
             "fun_facts": ["Ancient Athens had an early form of democracy."],
             "related": ["Constitution", "Citizenship"],
         }
-    return {
-        "steps": ["Identify time, place, people, and causes/effects."],
-        "examples": ["Cause and effect in historical events."],
-        "practice": ["Make a timeline of three key events from a chapter."],
-        "tips": ["Use maps and dates to organize information."],
-        "summary": ["Social studies connects people, places, and time."],
-        "fun_facts": ["The Silk Road was a network, not one road."],
-        "related": ["Timelines", "Maps", "Civics"],
-    }
+    else:
+        base = {
+            "steps": ["Identify time, place, people, and causes/effects."],
+            "examples": ["Cause and effect in historical events."],
+            "practice": ["Make a timeline of three key events from a chapter."],
+            "tips": ["Use maps and dates to organize information."],
+            "summary": ["Social studies connects people, places, and time."],
+            "fun_facts": ["The Silk Road was a network, not one road."],
+            "related": ["Timelines", "Maps", "Civics"],
+        }
+
+    base.update({
+        "visuals": [
+            "Timeline sketch with dates and short notes.",
+            "Map outline highlighting key regions."
+        ],
+        "revision": [
+            "Remember key terms: democracy, constitution, citizen.",
+            "Practice reading maps and legends."
+        ],
+        "quiz": [
+            "Short answer: What is one feature of a democracy?",
+            "Match: Event → Year (from your chapter)."
+        ]
+    })
+    return base
 
 
 def explain_languages(level: int, question: str) -> Dict[str, List[str]]:
-    return {
+    base = {
         "steps": ["Learn basic greetings, numbers, and simple grammar."],
         "examples": ["Hola (Hello) in Spanish; Namaste in Hindi."],
         "practice": ["Translate five classroom objects into the target language."],
@@ -248,6 +318,50 @@ def explain_languages(level: int, question: str) -> Dict[str, List[str]]:
         "fun_facts": ["Many languages share common roots called cognates."],
         "related": ["Pronunciation", "Vocabulary", "Grammar"],
     }
+    base.update({
+        "visuals": ["Flashcards with picture on one side and word on the other."],
+        "revision": ["Revise 10 core words daily and one grammar rule."],
+        "quiz": ["Say or write 3 greetings and 3 numbers in the language."]
+    })
+    return base
+
+
+def explain_computer(level: int, question: str) -> Dict[str, List[str]]:
+    q = question.lower()
+    if any(k in q for k in ["algorithm", "flowchart"]):
+        base = {
+            "steps": [
+                "Define the problem clearly.",
+                "List steps in order (algorithm).",
+                "Draw a flowchart with start/end, input/output, and process boxes.",
+                "Test the steps with a simple example."
+            ],
+            "examples": [
+                "Algorithm: Make tea → Boil water → Add tea → Pour → Add milk/sugar.",
+                "Flowchart: Start → Read two numbers → Add → Show sum → End"
+            ],
+            "practice": ["Write an algorithm for brushing teeth.", "Draw a flowchart for adding two numbers."],
+            "tips": ["Use clear, short steps; one action per step."],
+            "summary": ["Algorithms are ordered steps; flowcharts show them visually."],
+            "fun_facts": ["The word 'algorithm' comes from Al-Khwarizmi, a Persian scholar."],
+            "related": ["Pseudocode", "Debugging", "Programming basics"],
+        }
+    else:
+        base = {
+            "steps": ["Input → Process → Output → Storage (IPO cycle)."],
+            "examples": ["Typing (input), Word processor (process), Printed page (output)."],
+            "practice": ["List 2 input and 2 output devices."],
+            "tips": ["Keep files organized with clear names and folders."],
+            "summary": ["Computers take input, process it, and give output; they can store data."],
+            "fun_facts": ["Early computers filled whole rooms!"],
+            "related": ["Hardware", "Software", "Networks"],
+        }
+    base.update({
+        "visuals": ["Block diagram: Input → CPU → Output, with Storage connected."],
+        "revision": ["Revise basic parts: CPU, memory, storage, input/output devices."],
+        "quiz": ["MCQ: CPU stands for _____.", "Name one input and one output device."]
+    })
+    return base
 
 
 def generate_content(level: int, subject: Subject, question: str) -> Dict[str, List[str]]:
@@ -259,6 +373,8 @@ def generate_content(level: int, subject: Subject, question: str) -> Dict[str, L
         return explain_english(level, question)
     if subject == "Social Studies":
         return explain_social(level, question)
+    if subject == "Computer":
+        return explain_computer(level, question)
     return explain_languages(level, question)
 
 # ----- Routes -----
@@ -280,7 +396,7 @@ def assist(req: AssistRequest):
             topic="Safety Guard",
             sections=[Section(title="Notice", content=[
                 "I can't help with harmful or inappropriate content.",
-                "Please ask about your school subjects like Math, Science, English, Social Studies, or Languages."
+                "Please ask about your school subjects like Math, Science, English, Social Studies, Languages, or Computer."
             ])],
             safety_note="Content filtered for safety."
         )
@@ -289,7 +405,10 @@ def assist(req: AssistRequest):
     content = generate_content(req.student_class, req.subject, req.question)
 
     # Pick sections according to req.needs or include all
-    order = ["explanation", "steps", "examples", "practice", "summary", "tips", "fun_facts", "related"]
+    order = [
+        "explanation", "steps", "examples", "practice", "summary", "tips", "fun_facts", "related",
+        "visuals", "revision", "quiz"
+    ]
     include = set(req.needs) if req.needs else set(order)
 
     sections: List[Section] = []
@@ -298,7 +417,8 @@ def assist(req: AssistRequest):
     tone = level_tone(req.student_class)
     intro = [
         f"Let's learn about: {req.question.strip()}.",
-        "I'll keep it " + tone["voice"] + "."
+        "I'll keep it " + tone["voice"] + ".",
+        "You'll get steps, examples, practice, visuals, a short quiz, and revision notes."
     ]
     if "explanation" in include:
         sections.append(Section(title="Explanation", content=intro))
@@ -312,6 +432,9 @@ def assist(req: AssistRequest):
         "tips": "Helpful Tips",
         "fun_facts": "Fun Facts",
         "related": "Related Topics",
+        "visuals": "Visual Description",
+        "revision": "Revision Notes",
+        "quiz": "Interactive Quiz",
     }
     for key, title in mapping.items():
         if key in include and key in content:
